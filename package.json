@@ -1,0 +1,18 @@
+{
+  "name": "grate-api",
+  "version": "0.1.0",
+  "description": "Server side of the gRate social network",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "repository": "git@github.com:ardier16/grate-api.git",
+  "author": "ardier16 <ardier16@gmail.com>",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.14",
+    "nodemon": "^1.18.10"
+  }
+}
