@@ -1,27 +1,24 @@
-let express = require('express')
-
-let bodyParser = require('body-parser')
-
-let mongoose = require('mongoose')
-
-let app = express()
-
-let apiRoutes = require("./api-routes")
+const express = require('express')
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+const app = express()
+const apiRoutes = require('./api-routes')
+const config = require('./config')
 
 app.use(bodyParser.urlencoded({
   extended: true
 }))
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://localhost/grate')
-let db = mongoose.connection;
+mongoose.connect(config.dbConnectionString, {
+  useNewUrlParser: true,
+})
 
-let port = process.env.PORT || 8080
+const db = mongoose.connection
+const port = process.env.PORT || config.port
 
-app.get('/', (req, res) => res.send('Hello World with Express'))
-
-app.use('/api', apiRoutes)
+app.use('/', apiRoutes)
 
 app.listen(port, function () {
-  console.log("Running gRate on port " + port)
+  console.log(`Running gRate on port ${port}`)
 })
