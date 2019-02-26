@@ -38,5 +38,6 @@ module.exports = {
     }],
     'no-tabs': 2,
     'comma-dangle': [1, 'always-multiline'],
+    'eol-last': [1, 'always'],
   }
 }
