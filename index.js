@@ -1,14 +1,15 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const mongoose = require('mongoose')
+import express from 'express'
+import bodyParser from 'body-parser'
+import mongoose from 'mongoose'
+import routes from './api-routes'
+import config from './config'
+
 const app = express()
-const apiRoutes = require('./api-routes')
-const config = require('./config')
 
 app.use(bodyParser.urlencoded({
-  extended: true
+  extended: true,
 }))
-app.use(bodyParser.json());
+app.use(bodyParser.json())
 
 mongoose.connect(config.dbConnectionString, {
   useNewUrlParser: true,
@@ -17,8 +18,9 @@ mongoose.connect(config.dbConnectionString, {
 const db = mongoose.connection
 const port = process.env.PORT || config.port
 
-app.use('/', apiRoutes)
+app.use('/', routes)
 
-app.listen(port, function () {
-  console.log(`Running gRate on port ${port}`)
+app.listen(port, () => {
+  // eslint-disable-next-line no-console
+  console.log(`Running gRate on port ${port}. DB state: ${db.readyState}`)
 })
