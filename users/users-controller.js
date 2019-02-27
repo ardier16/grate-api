@@ -6,10 +6,23 @@ const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
 
 router.post('/', (req, res) => {
+  users.findOne({ email: req.body.email }, user => {
+    if (user) {
+      return res.status(400).send('User with such email already exists')
+    }
+  })
+
+  users.findOne({ name: req.body.name }, user => {
+    if (user) {
+      return res.status(400).send('User with such name already exists')
+    }
+  })
+
   users.create({
     name: req.body.name,
     email: req.body.email,
     password: req.body.passwordHash,
+    createdAt: Date.now(),
   },
   (err, user) => {
     if (err) {
