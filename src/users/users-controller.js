@@ -5,55 +5,54 @@ import users from './users'
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
 
-router.post('/', (req, res) => {
-  users.findOne({ email: req.body.email }, user => {
-    if (user) {
+router.post('/', async (req, res) => {
+  try {
+    const userByEmail = await users.findOne({ email: req.body.email })
+    const userByName = await users.findOne({ name: req.body.name })
+
+    if (userByEmail) {
       return res.status(400).send('User with such email already exists')
     }
-  })
 
-  users.findOne({ name: req.body.name }, user => {
-    if (user) {
+    if (userByName) {
       return res.status(400).send('User with such name already exists')
     }
-  })
 
-  users.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.passwordHash,
-    createdAt: Date.now(),
-  },
-  (err, user) => {
-    if (err) {
-      res.status(500)
-        .send('There was a problem adding the information to the database.')
-    } else {
+    const newUser = await users.create({
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.passwordHash,
+      createdAt: Date.now(),
+    })
+
+    res.status(200).send(newUser)
+  } catch (e) {
+    res.status(500)
+      .send('There was a problem adding the information to the database.')
+  }
+})
+
+router.get('/', async (req, res) => {
+  try {
+    const data = await users.find({})
+    res.status(200).send(data)
+  } catch (e) {
+    res.status(500).send('There was a problem finding the users.')
+  }
+})
+
+router.get('/:id', async (req, res) => {
+  try {
+    const user = users.findById(req.params.id)
+
+    if (user) {
       res.status(200).send(user)
-    }
-  })
-})
-
-router.get('/', (req, res) => {
-  users.find({}, (err, users) => {
-    if (err) {
-      res.status(500).send('There was a problem finding the users.')
     } else {
-      res.status(200).send(users)
-    }
-  })
-})
-
-router.get('/:id', (req, res) => {
-  users.findById(req.params.id, (err, user) => {
-    if (err) {
-      res.status(500).send('There was a problem finding the user.')
-    } else if (!user) {
       res.status(404).send('No user found.')
-    } else {
-      res.status(200).send(user)
     }
-  })
+  } catch (e) {
+    res.status(500).send('There was a problem finding the user.')
+  }
 })
 
 export default router
