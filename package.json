@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "nodemon --exec babel-node src/index.js",
-    "lint": "eslint './src/**/*.js' --cache --fix --max-warnings=0"
+    "lint": "eslint ./src/**/*.js --cache --fix --max-warnings=0"
   },
   "repository": "git@github.com:ardier16/grate-api.git",
   "author": "ardier16 <ardier16@gmail.com>",
@@ -19,6 +19,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "husky": "^1.3.1",
+    "jsonwebtoken": "^8.5.0",
     "mongoose": "^5.4.14",
     "nodemon": "^1.18.10"
   },
