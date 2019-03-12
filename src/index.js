@@ -6,6 +6,7 @@ import routes from './api-routes'
 import config from './config'
 
 import UsersController from './users/users-controller'
+import AuthController from './auth/auth-controller'
 
 const app = express()
 
@@ -23,6 +24,7 @@ const port = process.env.PORT || config.port
 
 app.use('/', routes)
 app.use('/users', UsersController)
+app.use('/auth', AuthController)
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console

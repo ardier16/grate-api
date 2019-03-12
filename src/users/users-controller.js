@@ -1,5 +1,6 @@
 import express from 'express'
 import bodyParser from 'body-parser'
+
 import users from './users'
 
 const router = express.Router()
@@ -21,7 +22,7 @@ router.post('/', async (req, res) => {
     const newUser = await users.create({
       name: req.body.name,
       email: req.body.email,
-      password: req.body.passwordHash,
+      passwordHash: req.body.passwordHash,
       createdAt: Date.now(),
     })
 
@@ -35,7 +36,13 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const data = await users.find({})
-    res.status(200).send(data)
+    res.status(200).send(data.map(user => {
+      return {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      }
+    }))
   } catch (e) {
     res.status(500).send('There was a problem finding the users.')
   }
@@ -43,10 +50,14 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const user = users.findById(req.params.id)
+    const user = await users.findById(req.params.id)
 
     if (user) {
-      res.status(200).send(user)
+      res.status(200).send({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      })
     } else {
       res.status(404).send('No user found.')
     }
