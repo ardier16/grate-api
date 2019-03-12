@@ -10,24 +10,29 @@ const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
 router.use(bodyParser.json())
 
-router.post('/auth', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const userByEmail = await users.findOne({ email: req.body.email })
+    const userByEmail = await users.findOne({ email: req.body.login })
+    const userByName = await users.findOne({ name: req.body.login })
+    const user = userByEmail || userByName
 
-    if (userByEmail) {
+    if (!user) {
       return res.status(404).send('Not found')
     }
 
-    if (req.body.passwordHash !== userByEmail.passwordHash) {
+    if (req.body.passwordHash === user.passwordHash) {
+      const expiresIn = 86400
+      const token = jwt.sign({ id: user._id }, config.secret, {
+        expiresIn,
+      })
+
+      res.status(200).send({ token, expiresIn })
+    } else {
       return res.status(401).send('Unauthorized')
     }
-
-    const token = jwt.sign({ id: userByEmail._id }, config.secret, {
-      expiresIn: 86400,
-    })
-
-    res.status(200).send({ token })
   } catch (e) {
     res.status(500).send('Internal server error')
   }
 })
+
+export default router
