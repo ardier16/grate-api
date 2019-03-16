@@ -10,7 +10,7 @@ Using SSH: `git clone git@github.com:ardier16/grate-api.git`
 
 or
 
-Using HTTPS: `https://github.com/ardier16/grate-api.git`
+Using HTTPS: `git clone https://github.com/ardier16/grate-api.git`
 
 ### Prepare the environment
 
