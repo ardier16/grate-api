@@ -2,10 +2,10 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 
-import routes from './api-routes'
 import config from './config'
 
 import UsersController from './users/users-controller'
+import ProfilesController from './profiles/profiles-controller'
 import AuthController from './auth/auth-controller'
 
 const app = express()
@@ -22,8 +22,8 @@ mongoose.connect(config.dbConnectionString, {
 const db = mongoose.connection
 const port = process.env.PORT || config.port
 
-app.use('/', routes)
 app.use('/users', UsersController)
+app.use('/profiles', ProfilesController)
 app.use('/auth', AuthController)
 
 app.listen(port, () => {
