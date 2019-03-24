@@ -12,7 +12,7 @@ router.use(bodyParser.json())
 
 router.post('/', async (req, res) => {
   try {
-    const userByEmail = await users.findOne({ email: req.body.login })
+    const userByEmail = await users.findOne({ email: req.body.email })
     const userByName = await users.findOne({ name: req.body.login })
     const user = userByEmail || userByName
 

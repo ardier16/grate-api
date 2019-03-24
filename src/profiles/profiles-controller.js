@@ -20,6 +20,7 @@ router.post('/', verifyToken, async (req, res) => {
       birthDate: req.body.birthDate,
       avatarUrl: req.body.avatarUrl,
       status: req.body.status,
+      userId: req.body.userId,
     })
 
     res.status(200).send(newUser)
@@ -39,6 +40,7 @@ router.get('/', async (req, res) => {
         birthDate: profile.birthDate,
         avatarUrl: profile.avatarUrl,
         status: profile.status,
+        userId: profile.userId,
       }
     }))
   } catch (e) {
@@ -57,6 +59,37 @@ router.get('/:id', async (req, res) => {
         birthDate: profile.birthDate,
         avatarUrl: profile.avatarUrl,
         status: profile.status,
+        userId: profile.userId,
+      })
+    } else {
+      res.status(404).send('No profile found.')
+    }
+  } catch (e) {
+    res.status(500).send('There was a problem finding the profile.')
+  }
+})
+
+router.put('/:id', verifyToken, async (req, res) => {
+  try {
+    const profile = await profiles.findById(req.params.id)
+
+    if (profile) {
+      await profiles.updateOne({ _id: profile._id }, {
+        name: req.body.name || profile.name,
+        birthDate: req.body.birthDate || profile.birthDate,
+        avatarUrl: req.body.avatarUrl || profile.avatarUrl,
+        status: req.body.status || profile.status,
+      })
+
+      const newProfile = await profiles.findById(req.params.id)
+
+      res.status(200).send({
+        _id: newProfile._id,
+        name: newProfile.name,
+        birthDate: newProfile.birthDate,
+        avatarUrl: newProfile.avatarUrl,
+        status: newProfile.status,
+        userId: newProfile.userId,
       })
     } else {
       res.status(404).send('No profile found.')
