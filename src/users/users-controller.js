@@ -1,6 +1,11 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
+import jwt from 'jsonwebtoken'
+import config from '../config'
+
+import { CryptoUtil } from '../utils/crypto.util'
+
 import users from './users'
 
 const router = express.Router()
@@ -19,14 +24,25 @@ router.post('/', async (req, res) => {
       return res.status(400).send('User with such name already exists')
     }
 
+    const passwordHash = CryptoUtil.sha256(req.body.password)
+
     const newUser = await users.create({
       name: req.body.name,
       email: req.body.email,
-      passwordHash: req.body.passwordHash,
+      passwordHash,
       createdAt: Date.now(),
     })
 
-    res.status(200).send(newUser)
+    const expiresIn = 86400
+    const token = jwt.sign({ id: newUser._id }, config.secret, {
+      expiresIn,
+    })
+
+    res.status(200).send({
+      id: newUser._id,
+      token,
+      expiresIn,
+    })
   } catch (e) {
     res.status(500)
       .send('There was a problem adding the information to the database.')
