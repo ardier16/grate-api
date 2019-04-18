@@ -6,13 +6,15 @@ import config from '../config'
 
 import users from '../users/users'
 
+import { CryptoUtil } from '../utils/crypto.util'
+
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
 router.use(bodyParser.json())
 
 router.post('/', async (req, res) => {
   try {
-    const userByEmail = await users.findOne({ email: req.body.email })
+    const userByEmail = await users.findOne({ email: req.body.login })
     const userByName = await users.findOne({ name: req.body.login })
     const user = userByEmail || userByName
 
@@ -20,13 +22,18 @@ router.post('/', async (req, res) => {
       return res.status(404).send('Not found')
     }
 
-    if (req.body.passwordHash === user.passwordHash) {
+    const passwordHash = CryptoUtil.sha256(req.body.password)
+    if (passwordHash === user.passwordHash) {
       const expiresIn = 86400
       const token = jwt.sign({ id: user._id }, config.secret, {
         expiresIn,
       })
 
-      res.status(200).send({ token, expiresIn })
+      res.status(200).send({
+        id: user._id,
+        token,
+        expiresIn,
+      })
     } else {
       return res.status(401).send('Unauthorized')
     }
