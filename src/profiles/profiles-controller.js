@@ -9,7 +9,7 @@ router.use(bodyParser.urlencoded({ extended: true }))
 
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const profileByUserId = await profiles.findOne({ userId: req.body.userId })
+    const profileByUserId = await profiles.findOne({ userId: req.userId })
 
     if (profileByUserId) {
       return res.status(400).send('Profile with such user ID already exists')
@@ -20,7 +20,7 @@ router.post('/', verifyToken, async (req, res) => {
       birthDate: req.body.birthDate,
       avatarUrl: req.body.avatarUrl,
       status: req.body.status,
-      userId: req.body.userId,
+      userId: req.userId,
     })
 
     res.status(200).send(newUser)
@@ -48,9 +48,15 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   try {
-    const profile = await profiles.findById(req.params.id)
+    let profile
+
+    if (req.params.id === 'mine') {
+      profile = await profiles.findOne({ userId: req.userId })
+    } else {
+      profile = await profiles.findById(req.params.id)
+    }
 
     if (profile) {
       res.status(200).send({
