@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 
@@ -11,6 +12,7 @@ import AuthController from './auth/auth-controller'
 
 const app = express()
 
+app.use(cors())
 app.use(bodyParser.urlencoded({
   extended: true,
 }))
