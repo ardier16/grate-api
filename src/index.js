@@ -10,6 +10,7 @@ import ProfilesController from './profiles/profiles-controller'
 import PostsController from './posts/posts-controller'
 import AuthController from './auth/auth-controller'
 import DocumentsController from './documents/documents-controller'
+import FilesController from './files/files-controller'
 
 const app = express()
 
@@ -31,6 +32,8 @@ app.use('/profiles', ProfilesController)
 app.use('/posts', PostsController)
 app.use('/auth', AuthController)
 app.use('/documents', DocumentsController)
+
+app.use('/uploads', FilesController)
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console

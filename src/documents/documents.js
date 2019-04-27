@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const DocumentSchema = new mongoose.Schema({
-  url: String,
+  path: String,
   createdAt: Date,
 })
 
