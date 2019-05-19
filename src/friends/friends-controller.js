@@ -103,61 +103,52 @@ router.get('/', verifyToken, async (req, res) => {
       }
     }))
   } catch (e) {
-    res.status(500).send('There was a problem finding the posts.')
+    res.status(500).send('There was a problem finding the requests.')
   }
 })
 
-// router.put('/:id', verifyToken, async (req, res) => {
-//   try {
-//     const post = await posts.findById(req.params.id)
+router.get('/received', verifyToken, async (req, res) => {
+  try {
+    const participatedRequests = await friends.find({
+      state: REQUEST_STATES.pending,
+      participantId: req.userId,
+    })
 
-//     if (post) {
-//       if (post.ownerId.toString() === req.userId) {
-//         await posts.updateOne({ _id: post._id }, {
-//           title: req.body.title || post.title,
-//           text: req.body.text || post.text,
-//           updatedAt: new Date(),
-//         })
+    res.status(200).send(participatedRequests.map(request => {
+      return {
+        id: request._id,
+        ownerId: request.ownerId,
+        participantId: request.participantId,
+        state: request.state,
+        createdAt: request.createdAt,
+        updatedAt: request.updatedAt,
+      }
+    }))
+  } catch (e) {
+    res.status(500).send('There was a problem finding the requests.')
+  }
+})
 
-//         const updatedPost = await posts.findById(req.params.id)
+router.get('/sent', verifyToken, async (req, res) => {
+  try {
+    const ownedRequests = await friends.find({
+      state: REQUEST_STATES.approved,
+      ownerId: req.userId,
+    })
 
-//         res.status(200).send({
-//           id: updatedPost._id,
-//           title: updatedPost.title,
-//           text: updatedPost.text,
-//           createdAt: updatedPost.createdAt,
-//           updatedAt: updatedPost.updatedAt,
-//           ownerId: updatedPost.ownerId,
-//         })
-//       } else {
-//         res.status(401).send('The post can be updated only by owner.')
-//       }
-//     } else {
-//       res.status(404).send('No post found.')
-//     }
-//   } catch (e) {
-//     res.status(500).send('There was a problem finding the post.')
-//   }
-// })
-
-// router.delete('/:id', verifyToken, async (req, res) => {
-//   try {
-//     const post = await posts.findById(req.params.id)
-
-//     if (post) {
-//       if (post.ownerId.toString() === req.userId) {
-//         await posts.findByIdAndRemove(req.params.id)
-
-//         res.status(200).send('The post was successfully removed')
-//       } else {
-//         res.status(401).send('The post can be deleted only by owner.')
-//       }
-//     } else {
-//       res.status(404).send('No post found.')
-//     }
-//   } catch (e) {
-//     res.status(500).send('There was a problem finding the post.')
-//   }
-// })
+    res.status(200).send(ownedRequests.map(request => {
+      return {
+        id: request._id,
+        ownerId: request.ownerId,
+        participantId: request.participantId,
+        state: request.state,
+        createdAt: request.createdAt,
+        updatedAt: request.updatedAt,
+      }
+    }))
+  } catch (e) {
+    res.status(500).send('There was a problem finding the requests.')
+  }
+})
 
 export default router
