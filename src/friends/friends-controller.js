@@ -14,6 +14,7 @@ router.use(bodyParser.urlencoded({ extended: true }))
 router.post('/request', verifyToken, async (req, res) => {
   try {
     const friendRequest = await friends.findOne({
+      state: REQUEST_STATES.pending,
       $or: [
         {
           $and: [
@@ -77,7 +78,7 @@ router.post('/:id/reject', verifyToken, async (req, res) => {
     const friendRequest = await friends.findById(req.params.id)
     const isRequestValid = friendRequest &&
       friendRequest.state === REQUEST_STATES.pending &&
-      friendRequest.participantId === req.userId
+      friendRequest.participantId.toString() === req.userId
 
     if (isRequestValid) {
       await friends.updateOne({ _id: friendRequest._id }, {
@@ -108,7 +109,11 @@ router.get('/', verifyToken, async (req, res) => {
 
     const friendsIds = ownedRequests
       .concat(participatedRequests)
-      .map(f => f.ownerId === req.userId ? f.participantId : f.ownerId)
+      .map(f => {
+        return f.ownerId.toString() === req.userId
+          ? f.participantId
+          : f.ownerId
+      })
 
     const friendProfiles = await profiles
       .where('userId').in(friendsIds)
