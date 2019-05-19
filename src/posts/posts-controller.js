@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
     const data = await posts.find({})
     res.status(200).send(data.map(post => {
       return {
-        _id: post._id,
+        id: post._id,
         title: post.title,
         text: post.text,
         createdAt: post.createdAt,
@@ -48,7 +48,7 @@ router.get('/:id', async (req, res) => {
 
     if (post) {
       res.status(200).send({
-        _id: post._id,
+        id: post._id,
         title: post.title,
         text: post.text,
         createdAt: post.createdAt,
@@ -78,7 +78,7 @@ router.put('/:id', verifyToken, async (req, res) => {
         const updatedPost = await posts.findById(req.params.id)
 
         res.status(200).send({
-          _id: updatedPost._id,
+          id: updatedPost._id,
           title: updatedPost.title,
           text: updatedPost.text,
           createdAt: updatedPost.createdAt,

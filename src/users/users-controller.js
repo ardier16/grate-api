@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
     const data = await users.find({})
     res.status(200).send(data.map(user => {
       return {
-        _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
       }
@@ -70,7 +70,7 @@ router.get('/:id', async (req, res) => {
 
     if (user) {
       res.status(200).send({
-        _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
       })
