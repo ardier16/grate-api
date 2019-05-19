@@ -13,15 +13,36 @@ router.use(bodyParser.urlencoded({ extended: true }))
 
 router.post('/request', verifyToken, async (req, res) => {
   try {
-    const newFriendRequest = await friends.create({
-      participantId: req.body.participantId,
-      state: REQUEST_STATES.pending,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ownerId: req.userId,
+    const friendRequest = await friends.findOne({
+      $or: [
+        {
+          $and: [
+            { ownerId: req.userId },
+            { participantId: req.body.participantId },
+          ],
+        },
+        {
+          $and: [
+            { ownerId: req.body.participantId },
+            { participantId: req.userId },
+          ],
+        },
+      ],
     })
 
-    res.status(200).send(newFriendRequest)
+    if (friendRequest) {
+      res.status(409).send('This request already exists')
+    } else {
+      const newFriendRequest = await friends.create({
+        participantId: req.body.participantId,
+        state: REQUEST_STATES.pending,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ownerId: req.userId,
+      })
+
+      res.status(200).send(newFriendRequest)
+    }
   } catch (e) {
     res.status(500)
       .send('There was a problem adding the information to the database.')
@@ -64,7 +85,7 @@ router.post('/:id/reject', verifyToken, async (req, res) => {
         updatedAt: new Date(),
       })
 
-      res.status(204)
+      res.status(204).send()
     } else {
       res.status(404).send('No request found.')
     }
@@ -132,7 +153,7 @@ router.get('/received', verifyToken, async (req, res) => {
 router.get('/sent', verifyToken, async (req, res) => {
   try {
     const ownedRequests = await friends.find({
-      state: REQUEST_STATES.approved,
+      state: REQUEST_STATES.pending,
       ownerId: req.userId,
     })
 
