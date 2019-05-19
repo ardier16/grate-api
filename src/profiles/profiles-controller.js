@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
     const data = await profiles.find({})
     res.status(200).send(data.map(profile => {
       return {
-        _id: profile._id,
+        id: profile._id,
         name: profile.name,
         birthDate: profile.birthDate,
         avatarUrl: profile.avatarUrl,
@@ -60,7 +60,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 
     if (profile) {
       res.status(200).send({
-        _id: profile._id,
+        id: profile._id,
         name: profile.name,
         birthDate: profile.birthDate,
         avatarUrl: profile.avatarUrl,
@@ -90,7 +90,7 @@ router.put('/:id', verifyToken, async (req, res) => {
       const newProfile = await profiles.findById(req.params.id)
 
       res.status(200).send({
-        _id: newProfile._id,
+        id: newProfile._id,
         name: newProfile.name,
         birthDate: newProfile.birthDate,
         avatarUrl: newProfile.avatarUrl,
