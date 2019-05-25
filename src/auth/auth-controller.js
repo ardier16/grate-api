@@ -15,8 +15,8 @@ router.use(bodyParser.json())
 router.post('/', async (req, res) => {
   try {
     const userByEmail = await users.findOne({ email: req.body.login })
-    const userByName = await users.findOne({ name: req.body.login })
-    const user = userByEmail || userByName
+    const userByLogin = await users.findOne({ login: req.body.login })
+    const user = userByEmail || userByLogin
 
     if (!user) {
       return res.status(404).send('Not found')

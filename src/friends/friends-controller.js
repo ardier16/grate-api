@@ -4,7 +4,7 @@ import bodyParser from 'body-parser'
 import { verifyToken } from '../auth/verify-token'
 
 import friends from './friends'
-import profiles from '../profiles/profiles'
+import users from '../users/users'
 
 import { REQUEST_STATES } from '../const/request-states'
 
@@ -115,18 +115,18 @@ router.get('/', verifyToken, async (req, res) => {
           : f.ownerId
       })
 
-    const friendProfiles = await profiles
-      .where('userId').in(friendsIds)
+    const friendUsers = await users.where('_id').in(friendsIds)
 
-    res.status(200).send(friendProfiles.map(profile => {
+    res.status(200).send(friendUsers.map(user => {
       return {
-        id: profile._id,
-        name: profile.name,
-        birthDate: profile.birthDate,
-        avatarUrl: profile.avatarUrl,
-        status: profile.status,
-        userId: profile.userId,
-        lastSeen: profile.lastSeen,
+        id: user._id,
+        login: user.login,
+        email: user.email,
+        name: user.name,
+        birthDate: user.birthDate,
+        avatarUrl: user.avatarUrl,
+        status: user.status,
+        lastSeen: user.lastSeen,
       }
     }))
   } catch (e) {

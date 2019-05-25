@@ -3,6 +3,7 @@ import bodyParser from 'body-parser'
 
 import { verifyToken } from '../auth/verify-token'
 import posts from './posts'
+import users from '../users/users';
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -26,18 +27,33 @@ router.post('/', verifyToken, async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const data = await posts.find({})
-    res.status(200).send(data.map(post => {
-      return {
-        id: post._id,
-        title: post.title,
-        text: post.text,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        ownerId: post.ownerId,
-      }
-    }))
+    const availablePosts = await posts.find({})
+    const authors = await users.where('_id').in(
+      availablePosts.map(p => p.ownerId)
+    )
+
+    res.status(200).send(availablePosts
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(post => {
+        const author = authors
+          .find(a => a._id.toString() === post.ownerId.toString())
+
+        return {
+          id: post._id,
+          title: post.title,
+          text: post.text,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          author: {
+            id: author._id,
+            name: author.name,
+            login: author.login,
+            avatarUrl: author.avatarUrl,
+          },
+        }
+      }))
   } catch (e) {
+    console.error(e)
     res.status(500).send('There was a problem finding the posts.')
   }
 })
