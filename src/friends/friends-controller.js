@@ -126,6 +126,7 @@ router.get('/', verifyToken, async (req, res) => {
         avatarUrl: profile.avatarUrl,
         status: profile.status,
         userId: profile.userId,
+        lastSeen: profile.lastSeen,
       }
     }))
   } catch (e) {
