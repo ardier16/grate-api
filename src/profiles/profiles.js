@@ -6,6 +6,7 @@ const ProfileSchema = new mongoose.Schema({
   birthDate: Date,
   avatarUrl: String,
   status: String,
+  lastSeen: Date,
 })
 
 mongoose.model('Profile', ProfileSchema)

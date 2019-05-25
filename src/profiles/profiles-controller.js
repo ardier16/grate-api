@@ -21,6 +21,7 @@ router.post('/', verifyToken, async (req, res) => {
       avatarUrl: req.body.avatarUrl,
       status: req.body.status,
       userId: req.userId,
+      lastSeen: new Date(),
     })
 
     res.status(200).send(newUser)
@@ -41,6 +42,7 @@ router.get('/', async (req, res) => {
         avatarUrl: profile.avatarUrl,
         status: profile.status,
         userId: profile.userId,
+        lastSeen: profile.lastSeen,
       }
     }))
   } catch (e) {
@@ -66,6 +68,7 @@ router.get('/:id', verifyToken, async (req, res) => {
         avatarUrl: profile.avatarUrl,
         status: profile.status,
         userId: profile.userId,
+        lastSeen: profile.lastSeen,
       })
     } else {
       res.status(404).send('No profile found.')
