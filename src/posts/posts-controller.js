@@ -3,7 +3,9 @@ import bodyParser from 'body-parser'
 
 import { verifyToken } from '../auth/verify-token'
 import posts from './posts'
-import users from '../users/users';
+import users from '../users/users'
+import friends from '../friends/friends';
+import { REQUEST_STATES } from '../const/request-states';
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -53,7 +55,58 @@ router.get('/', async (req, res) => {
         }
       }))
   } catch (e) {
-    console.error(e)
+    res.status(500).send('There was a problem finding the posts.')
+  }
+})
+
+router.get('/feed', verifyToken, async (req, res) => {
+  try {
+    const ownedRequests = await friends.find({
+      state: REQUEST_STATES.approved,
+      ownerId: req.userId,
+    })
+    const participatedRequests = await friends.find({
+      state: REQUEST_STATES.approved,
+      participantId: req.userId,
+    })
+
+    const friendsIds = ownedRequests
+      .concat(participatedRequests)
+      .map(f => {
+        return f.ownerId.toString() === req.userId
+          ? f.participantId
+          : f.ownerId
+      })
+
+    const availablePosts = await posts.where('ownerId').in([
+      req.userId,
+      ...friendsIds,
+    ])
+    const authors = await users.where('_id').in(
+      availablePosts.map(p => p.ownerId)
+    )
+
+    res.status(200).send(availablePosts
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map(post => {
+        const author = authors
+          .find(a => a._id.toString() === post.ownerId.toString())
+
+        return {
+          id: post._id,
+          title: post.title,
+          text: post.text,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          author: {
+            id: author._id,
+            name: author.name,
+            login: author.login,
+            avatarUrl: author.avatarUrl,
+          },
+        }
+      }))
+  } catch (e) {
     res.status(500).send('There was a problem finding the posts.')
   }
 })
