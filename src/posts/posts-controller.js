@@ -4,8 +4,8 @@ import bodyParser from 'body-parser'
 import { verifyToken } from '../auth/verify-token'
 import posts from './posts'
 import users from '../users/users'
-import friends from '../friends/friends';
-import { REQUEST_STATES } from '../const/request-states';
+import friends from '../friends/friends'
+import { REQUEST_STATES } from '../const/request-states'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))

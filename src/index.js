@@ -11,6 +11,7 @@ import AuthController from './auth/auth-controller'
 import DocumentsController from './documents/documents-controller'
 import FilesController from './files/files-controller'
 import FriendsController from './friends/friends-controller'
+import FactorsController from './factors/factors-controller'
 
 const app = express()
 
@@ -32,6 +33,7 @@ app.use('/posts', PostsController)
 app.use('/auth', AuthController)
 app.use('/documents', DocumentsController)
 app.use('/friends', FriendsController)
+app.use('/factors', FactorsController)
 
 app.use('/uploads', FilesController)
 
