@@ -2,11 +2,15 @@ import express from 'express'
 import bodyParser from 'body-parser'
 
 import { verifyToken } from '../auth/verify-token'
+
 import posts from './posts'
 import users from '../users/users'
 import friends from '../friends/friends'
-import { REQUEST_STATES } from '../const/request-states'
 import comments from './comments'
+import postRates from './post-rates'
+import factors from '../factors/factors'
+
+import { REQUEST_STATES } from '../const/request-states'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -43,6 +47,9 @@ router.get('/', async (req, res) => {
         const postComments = await comments.find({
           postId: post._id,
         })
+        const rates = await postRates.find({
+          postId: post._id,
+        })
 
         return {
           id: post._id,
@@ -57,6 +64,7 @@ router.get('/', async (req, res) => {
             avatarUrl: author.avatarUrl,
           },
           commentsCount: postComments.length,
+          ratesCount: rates.length,
         }
       })
 
@@ -84,6 +92,9 @@ router.get('/search', async (req, res) => {
         const postComments = await comments.find({
           postId: post._id,
         })
+        const rates = await postRates.find({
+          postId: post._id,
+        })
 
         return {
           id: post._id,
@@ -98,6 +109,7 @@ router.get('/search', async (req, res) => {
             avatarUrl: author.avatarUrl,
           },
           commentsCount: postComments.length,
+          ratesCount: rates.length,
         }
       })
 
@@ -142,6 +154,9 @@ router.get('/feed', verifyToken, async (req, res) => {
         const postComments = await comments.find({
           postId: post._id,
         })
+        const rates = await postRates.find({
+          postId: post._id,
+        })
 
         return {
           id: post._id,
@@ -156,6 +171,7 @@ router.get('/feed', verifyToken, async (req, res) => {
             avatarUrl: author.avatarUrl,
           },
           commentsCount: postComments.length,
+          ratesCount: rates.length,
         }
       })
 
@@ -172,6 +188,9 @@ router.get('/:id', async (req, res) => {
     if (post) {
       const author = await users.findOne({
         _id: post.ownerId,
+      })
+      const rates = await postRates.find({
+        postId: post._id,
       })
       const postComments = await comments.find({
         postId: post._id,
@@ -192,6 +211,14 @@ router.get('/:id', async (req, res) => {
           login: author.login,
           avatarUrl: author.avatarUrl,
         },
+        rates: rates.map(rate => ({
+          id: rate._id,
+          value: rate.value,
+          factorId: rate.factorId,
+          ownerId: rate.ownerId,
+          createdAt: rate.createdAt,
+          updatedAt: rate.updatedAt,
+        })),
         comments: postComments.map(comment => ({
           id: comment._id,
           author: commentAuthors
@@ -234,6 +261,90 @@ router.post('/:id/comment', verifyToken, async (req, res) => {
     }
   } catch (e) {
     res.status(500).send('There was a problem finding the post.')
+  }
+})
+
+router.post('/:id/rate', verifyToken, async (req, res) => {
+  try {
+    const post = await posts.findById(req.params.id)
+    const factor = await factors.findOne({
+      code: req.body.factorCode,
+    })
+
+    if (post && factor) {
+      const postRate = await postRates.findOne({
+        ownerId: req.userId,
+        postId: post._id,
+        factorId: factor._id,
+      })
+
+      if (postRate) {
+        await postRates.updateOne({ _id: postRate._id }, {
+          value: req.body.value,
+          updatedAt: new Date(),
+        })
+
+        res.status(204).send({})
+      } else {
+        const newPostRate = await postRates.create({
+          value: req.body.value,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ownerId: req.userId,
+          postId: post._id,
+          factorId: factor._id,
+        })
+
+        res.status(201).send(newPostRate)
+      }
+    } else {
+      res.status(404).send('No post or factor found.')
+    }
+  } catch (e) {
+    res.status(500).send('There was a problem adding the rate.')
+  }
+})
+
+router.put('/rates/:id', verifyToken, async (req, res) => {
+  try {
+    const rate = await postRates.findById(req.params.id)
+
+    if (rate) {
+      if (rate.ownerId.toString() === req.userId) {
+        await postRates.updateOne({ _id: rate._id }, {
+          value: req.body.value || rate.value,
+          updatedAt: new Date(),
+        })
+
+        res.status(204).send({})
+      } else {
+        res.status(401).send('The rate can be updated only by owner.')
+      }
+    } else {
+      res.status(404).send('No rate found.')
+    }
+  } catch (e) {
+    res.status(500).send('There was a problem finding the rate.')
+  }
+})
+
+router.delete('/rates/:id', verifyToken, async (req, res) => {
+  try {
+    const rate = await postRates.findById(req.params.id)
+
+    if (rate) {
+      if (rate.ownerId.toString() === req.userId) {
+        await postRates.findByIdAndDelete(req.params.id)
+
+        res.status(204).send({})
+      } else {
+        res.status(401).send('The rate can be deleted only by owner.')
+      }
+    } else {
+      res.status(404).send('No rate found.')
+    }
+  } catch (e) {
+    res.status(500).send('There was a problem finding the rate.')
   }
 })
 
