@@ -13,6 +13,11 @@ const UserSchema = new mongoose.Schema({
   lastSeen: Date,
 })
 
+UserSchema.index({
+  login: 'text',
+  email: 'text',
+  name: 'text',
+})
 mongoose.model('User', UserSchema)
 
 export default mongoose.model('User')
