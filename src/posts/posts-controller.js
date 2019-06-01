@@ -6,7 +6,7 @@ import posts from './posts'
 import users from '../users/users'
 import friends from '../friends/friends'
 import { REQUEST_STATES } from '../const/request-states'
-import comments from './comments';
+import comments from './comments'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -235,7 +235,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
 
     if (post) {
       if (post.ownerId.toString() === req.userId) {
-        await posts.findByIdAndRemove(req.params.id)
+        await posts.findByIdAndDelete(req.params.id)
 
         res.status(200).send('The post was successfully removed')
       } else {
@@ -246,6 +246,49 @@ router.delete('/:id', verifyToken, async (req, res) => {
     }
   } catch (e) {
     res.status(500).send('There was a problem finding the post.')
+  }
+})
+
+router.put('/comments/:id', verifyToken, async (req, res) => {
+  try {
+    const comment = await comments.findById(req.params.id)
+
+    if (comment) {
+      if (comment.ownerId.toString() === req.userId) {
+        await comments.updateOne({ _id: comment._id }, {
+          text: req.body.text || comment.text,
+          updatedAt: new Date(),
+        })
+
+        res.status(204).send({})
+      } else {
+        res.status(401).send('The comment can be updated only by owner.')
+      }
+    } else {
+      res.status(404).send('No comment found.')
+    }
+  } catch (e) {
+    res.status(500).send('There was a problem finding the comment.')
+  }
+})
+
+router.delete('/comments/:id', verifyToken, async (req, res) => {
+  try {
+    const comment = await comments.findById(req.params.id)
+
+    if (comment) {
+      if (comment.ownerId.toString() === req.userId) {
+        await comments.findByIdAndDelete(req.params.id)
+
+        res.status(204).send({})
+      } else {
+        res.status(401).send('The comment can be deleted only by owner.')
+      }
+    } else {
+      res.status(404).send('No comment found.')
+    }
+  } catch (e) {
+    res.status(500).send('There was a problem finding the comment.')
   }
 })
 
