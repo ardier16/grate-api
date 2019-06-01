@@ -77,6 +77,30 @@ router.get('/', async (req, res) => {
   }
 })
 
+router.get('/search', async (req, res) => {
+  try {
+    const data = await users.find({
+      $text: { $search: req.query.q },
+    })
+    res.status(200).send(data.map(user => {
+      return {
+        id: user._id,
+        login: user.login,
+        email: user.email,
+        name: user.name,
+        birthDate: user.birthDate,
+        avatarUrl: user.avatarUrl,
+        status: user.status,
+        lastSeen: user.lastSeen,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }
+    }))
+  } catch (e) {
+    res.status(500).send('There was a problem finding the users.')
+  }
+})
+
 router.get('/:id', async (req, res) => {
   try {
     const user = await users.findById(req.params.id)

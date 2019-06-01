@@ -8,6 +8,10 @@ const PostSchema = new mongoose.Schema({
   updatedAt: Date,
 })
 
+PostSchema.index({
+  title: 'text',
+  text: 'text',
+})
 mongoose.model('Post', PostSchema)
 
 export default mongoose.model('Post')
