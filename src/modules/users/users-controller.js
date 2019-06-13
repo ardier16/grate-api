@@ -2,10 +2,10 @@ import express from 'express'
 import bodyParser from 'body-parser'
 
 import jwt from 'jsonwebtoken'
-import config from '../config'
+import config from '../../config'
 import { verifyToken } from '../auth/verify-token'
 
-import { CryptoUtil } from '../utils/crypto.util'
+import { CryptoUtil } from '../../utils/crypto.util'
 
 import users from './users'
 

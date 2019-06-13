@@ -10,7 +10,7 @@ import comments from './comments'
 import postRates from './post-rates'
 import factors from '../factors/factors'
 
-import { REQUEST_STATES } from '../const/request-states'
+import { REQUEST_STATES } from '../../const/request-states'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))

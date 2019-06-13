@@ -6,7 +6,7 @@ import { verifyToken } from '../auth/verify-token'
 import friends from './friends'
 import users from '../users/users'
 
-import { REQUEST_STATES } from '../const/request-states'
+import { REQUEST_STATES } from '../../const/request-states'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))

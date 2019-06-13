@@ -2,11 +2,11 @@ import express from 'express'
 import bodyParser from 'body-parser'
 
 import jwt from 'jsonwebtoken'
-import config from '../config'
+import config from '../../config'
 
 import users from '../users/users'
 
-import { CryptoUtil } from '../utils/crypto.util'
+import { CryptoUtil } from '../../utils/crypto.util'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
