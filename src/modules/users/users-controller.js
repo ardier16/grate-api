@@ -8,6 +8,7 @@ import { verifyToken } from '../auth/verify-token'
 import { CryptoUtil } from '../../utils/crypto.util'
 
 import users from './users'
+import { RESPONSE_CODES } from '../../const/response-codes'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -18,11 +19,13 @@ router.post('/', async (req, res) => {
     const userByLogin = await users.findOne({ login: req.body.login })
 
     if (userByEmail) {
-      return res.status(400).send('User with such email already exists')
+      return res.status(RESPONSE_CODES.conflict)
+        .send('User with such email already exists')
     }
 
     if (userByLogin) {
-      return res.status(400).send('User with such login already exists')
+      return res.status(RESPONSE_CODES.conflict)
+        .send('User with such login already exists')
     }
 
     const passwordHash = CryptoUtil.sha256(req.body.password)
@@ -44,13 +47,13 @@ router.post('/', async (req, res) => {
       expiresIn,
     })
 
-    res.status(200).send({
+    res.status(RESPONSE_CODES.created).send({
       id: newUser._id,
       token,
       expiresIn,
     })
   } catch (e) {
-    res.status(500)
+    res.status(RESPONSE_CODES.internalServerError)
       .send('There was a problem adding the information to the database.')
   }
 })
@@ -58,7 +61,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const data = await users.find({})
-    res.status(200).send(data.map(user => {
+    res.status(RESPONSE_CODES.success).send(data.map(user => {
       return {
         id: user._id,
         login: user.login,
@@ -73,7 +76,8 @@ router.get('/', async (req, res) => {
       }
     }))
   } catch (e) {
-    res.status(500).send('There was a problem finding the users.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the users.')
   }
 })
 
@@ -82,7 +86,7 @@ router.get('/search', async (req, res) => {
     const data = await users.find({
       $text: { $search: req.query.q },
     })
-    res.status(200).send(data.map(user => {
+    res.status(RESPONSE_CODES.success).send(data.map(user => {
       return {
         id: user._id,
         login: user.login,
@@ -97,7 +101,8 @@ router.get('/search', async (req, res) => {
       }
     }))
   } catch (e) {
-    res.status(500).send('There was a problem finding the users.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the users.')
   }
 })
 
@@ -106,7 +111,7 @@ router.get('/:id', async (req, res) => {
     const user = await users.findById(req.params.id)
 
     if (user) {
-      res.status(200).send({
+      res.status(RESPONSE_CODES.success).send({
         id: user._id,
         login: user.login,
         email: user.email,
@@ -119,10 +124,11 @@ router.get('/:id', async (req, res) => {
         updatedAt: user.updatedAt,
       })
     } else {
-      res.status(404).send('No user found.')
+      res.status(RESPONSE_CODES.badRequest).send('No user found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the user.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the user.')
   }
 })
 
@@ -141,7 +147,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 
       const newUser = await users.findById(req.params.id)
 
-      res.status(200).send({
+      res.status(RESPONSE_CODES.success).send({
         id: newUser._id,
         login: newUser.login,
         email: newUser.email,
@@ -154,10 +160,11 @@ router.put('/:id', verifyToken, async (req, res) => {
         updatedAt: newUser.updatedAt,
       })
     } else {
-      res.status(404).send('No user found.')
+      res.status(RESPONSE_CODES.notFound).send('No user found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the user.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the user.')
   }
 })
 

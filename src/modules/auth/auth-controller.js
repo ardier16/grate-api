@@ -7,6 +7,7 @@ import config from '../../config'
 import users from '../users/users'
 
 import { CryptoUtil } from '../../utils/crypto.util'
+import { RESPONSE_CODES } from '../../const/response-codes'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
@@ -19,7 +20,7 @@ router.post('/', async (req, res) => {
     const user = userByEmail || userByLogin
 
     if (!user) {
-      return res.status(404).send('Not found')
+      return res.status(RESPONSE_CODES.notFound).send('Not found')
     }
 
     const passwordHash = CryptoUtil.sha256(req.body.password)
@@ -29,16 +30,16 @@ router.post('/', async (req, res) => {
         expiresIn,
       })
 
-      res.status(200).send({
+      res.status(RESPONSE_CODES.success).send({
         id: user._id,
         token,
         expiresIn,
       })
     } else {
-      return res.status(401).send('Unauthorized')
+      return res.status(RESPONSE_CODES.unauthorized).send('Unauthorized')
     }
   } catch (e) {
-    res.status(500).send('Internal server error')
+    res.status(RESPONSE_CODES.internalServerError).send('Internal server error')
   }
 })
 

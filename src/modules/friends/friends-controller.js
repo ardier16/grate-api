@@ -7,6 +7,7 @@ import friends from './friends'
 import users from '../users/users'
 
 import { REQUEST_STATES } from '../../const/request-states'
+import { RESPONSE_CODES } from '../../const/response-codes'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -32,7 +33,8 @@ router.post('/request', verifyToken, async (req, res) => {
     })
 
     if (friendRequest) {
-      res.status(409).send('This request already exists')
+      res.status(RESPONSE_CODES.conflict)
+        .send('This request already exists')
     } else {
       const newFriendRequest = await friends.create({
         participantId: req.body.participantId,
@@ -42,10 +44,10 @@ router.post('/request', verifyToken, async (req, res) => {
         ownerId: req.userId,
       })
 
-      res.status(200).send(newFriendRequest)
+      res.status(RESPONSE_CODES.success).send(newFriendRequest)
     }
   } catch (e) {
-    res.status(500)
+    res.status(RESPONSE_CODES.internalServerError)
       .send('There was a problem adding the information to the database.')
   }
 })
@@ -63,12 +65,12 @@ router.post('/:id/approve', verifyToken, async (req, res) => {
         updatedAt: new Date(),
       })
 
-      res.status(204).send()
+      res.status(RESPONSE_CODES.noContent).send()
     } else {
-      res.status(404).send('No request found.')
+      res.status(RESPONSE_CODES.notFound).send('No request found.')
     }
   } catch (e) {
-    res.status(500)
+    res.status(RESPONSE_CODES.internalServerError)
       .send('There was a problem adding the information to the database.')
   }
 })
@@ -86,12 +88,12 @@ router.post('/:id/reject', verifyToken, async (req, res) => {
         updatedAt: new Date(),
       })
 
-      res.status(204).send()
+      res.status(RESPONSE_CODES.noContent).send()
     } else {
-      res.status(404).send('No request found.')
+      res.status(RESPONSE_CODES.notFound).send('No request found.')
     }
   } catch (e) {
-    res.status(500)
+    res.status(RESPONSE_CODES.internalServerError)
       .send('There was a problem adding the information to the database.')
   }
 })
@@ -117,7 +119,7 @@ router.get('/', verifyToken, async (req, res) => {
 
     const friendUsers = await users.where('_id').in(friendsIds)
 
-    res.status(200).send(friendUsers.map(user => {
+    res.status(RESPONSE_CODES.success).send(friendUsers.map(user => {
       return {
         id: user._id,
         login: user.login,
@@ -130,7 +132,8 @@ router.get('/', verifyToken, async (req, res) => {
       }
     }))
   } catch (e) {
-    res.status(500).send('There was a problem finding the requests.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the requests.')
   }
 })
 
@@ -141,18 +144,20 @@ router.get('/received', verifyToken, async (req, res) => {
       participantId: req.userId,
     })
 
-    res.status(200).send(participatedRequests.map(request => {
-      return {
-        id: request._id,
-        ownerId: request.ownerId,
-        participantId: request.participantId,
-        state: request.state,
-        createdAt: request.createdAt,
-        updatedAt: request.updatedAt,
-      }
-    }))
+    res.status(RESPONSE_CODES.success)
+      .send(participatedRequests.map(request => {
+        return {
+          id: request._id,
+          ownerId: request.ownerId,
+          participantId: request.participantId,
+          state: request.state,
+          createdAt: request.createdAt,
+          updatedAt: request.updatedAt,
+        }
+      }))
   } catch (e) {
-    res.status(500).send('There was a problem finding the requests.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the requests.')
   }
 })
 
@@ -163,7 +168,7 @@ router.get('/sent', verifyToken, async (req, res) => {
       ownerId: req.userId,
     })
 
-    res.status(200).send(ownedRequests.map(request => {
+    res.status(RESPONSE_CODES.success).send(ownedRequests.map(request => {
       return {
         id: request._id,
         ownerId: request.ownerId,
@@ -174,7 +179,8 @@ router.get('/sent', verifyToken, async (req, res) => {
       }
     }))
   } catch (e) {
-    res.status(500).send('There was a problem finding the requests.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the requests.')
   }
 })
 

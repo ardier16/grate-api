@@ -11,6 +11,7 @@ import postRates from './post-rates'
 import factors from '../factors/factors'
 
 import { REQUEST_STATES } from '../../const/request-states'
+import { RESPONSE_CODES } from '../../const/response-codes'
 
 const router = express.Router()
 router.use(bodyParser.urlencoded({ extended: true }))
@@ -25,9 +26,9 @@ router.post('/', verifyToken, async (req, res) => {
       ownerId: req.userId,
     })
 
-    res.status(200).send(newPost)
+    res.status(RESPONSE_CODES.created).send(newPost)
   } catch (e) {
-    res.status(500)
+    res.status(RESPONSE_CODES.internalServerError)
       .send('There was a problem adding the information to the database.')
   }
 })
@@ -68,9 +69,10 @@ router.get('/', async (req, res) => {
         }
       })
 
-    res.status(200).send(await Promise.all(result))
+    res.status(RESPONSE_CODES.success).send(await Promise.all(result))
   } catch (e) {
-    res.status(500).send('There was a problem finding the posts.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the posts.')
   }
 })
 
@@ -113,9 +115,10 @@ router.get('/search', async (req, res) => {
         }
       })
 
-    res.status(200).send(await Promise.all(result))
+    res.status(RESPONSE_CODES.success).send(await Promise.all(result))
   } catch (e) {
-    res.status(500).send('There was a problem finding the posts.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the posts.')
   }
 })
 
@@ -175,9 +178,11 @@ router.get('/feed', verifyToken, async (req, res) => {
         }
       })
 
-    res.status(200).send(await Promise.all(result))
+    res.status(RESPONSE_CODES.success)
+      .send(await Promise.all(result))
   } catch (e) {
-    res.status(500).send('There was a problem finding the posts.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the posts.')
   }
 })
 
@@ -199,7 +204,7 @@ router.get('/:id', async (req, res) => {
         postComments.map(p => p.ownerId)
       )
 
-      res.status(200).send({
+      res.status(RESPONSE_CODES.success).send({
         id: post._id,
         title: post.title,
         text: post.text,
@@ -235,10 +240,11 @@ router.get('/:id', async (req, res) => {
         })),
       })
     } else {
-      res.status(404).send('No post found.')
+      res.status(RESPONSE_CODES.notFound).send('No post found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the post.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the post.')
   }
 })
 
@@ -255,12 +261,13 @@ router.post('/:id/comment', verifyToken, async (req, res) => {
         postId: post._id,
       })
 
-      res.status(201).send(newComment)
+      res.status(RESPONSE_CODES.created).send(newComment)
     } else {
-      res.status(404).send('No post found.')
+      res.status(RESPONSE_CODES.notFound).send('No post found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the post.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the post.')
   }
 })
 
@@ -284,7 +291,7 @@ router.post('/:id/rate', verifyToken, async (req, res) => {
           updatedAt: new Date(),
         })
 
-        res.status(204).send({})
+        res.status(RESPONSE_CODES.noContent).send({})
       } else {
         const newPostRate = await postRates.create({
           value: req.body.value,
@@ -295,13 +302,14 @@ router.post('/:id/rate', verifyToken, async (req, res) => {
           factorId: factor._id,
         })
 
-        res.status(201).send(newPostRate)
+        res.status(RESPONSE_CODES.created).send(newPostRate)
       }
     } else {
-      res.status(404).send('No post or factor found.')
+      res.status(RESPONSE_CODES.notFound).send('No post or factor found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem adding the rate.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem adding the rate.')
   }
 })
 
@@ -316,15 +324,17 @@ router.put('/rates/:id', verifyToken, async (req, res) => {
           updatedAt: new Date(),
         })
 
-        res.status(204).send({})
+        res.status(RESPONSE_CODES.noContent).send({})
       } else {
-        res.status(401).send('The rate can be updated only by owner.')
+        res.status(RESPONSE_CODES.unauthorized)
+          .send('The rate can be updated only by owner.')
       }
     } else {
-      res.status(404).send('No rate found.')
+      res.status(RESPONSE_CODES.notFound).send('No rate found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the rate.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the rate.')
   }
 })
 
@@ -336,15 +346,17 @@ router.delete('/rates/:id', verifyToken, async (req, res) => {
       if (rate.ownerId.toString() === req.userId) {
         await postRates.findByIdAndDelete(req.params.id)
 
-        res.status(204).send({})
+        res.status(RESPONSE_CODES.noContent).send({})
       } else {
-        res.status(401).send('The rate can be deleted only by owner.')
+        res.status(RESPONSE_CODES.unauthorized)
+          .send('The rate can be deleted only by owner.')
       }
     } else {
-      res.status(404).send('No rate found.')
+      res.status(RESPONSE_CODES.notFound).send('No rate found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the rate.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the rate.')
   }
 })
 
@@ -362,7 +374,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 
         const updatedPost = await posts.findById(req.params.id)
 
-        res.status(200).send({
+        res.status(RESPONSE_CODES.success).send({
           id: updatedPost._id,
           title: updatedPost.title,
           text: updatedPost.text,
@@ -371,13 +383,15 @@ router.put('/:id', verifyToken, async (req, res) => {
           ownerId: updatedPost.ownerId,
         })
       } else {
-        res.status(401).send('The post can be updated only by owner.')
+        res.status(RESPONSE_CODES.unauthorized)
+          .send('The post can be updated only by owner.')
       }
     } else {
-      res.status(404).send('No post found.')
+      res.status(RESPONSE_CODES.notFound).send('No post found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the post.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the post.')
   }
 })
 
@@ -389,15 +403,17 @@ router.delete('/:id', verifyToken, async (req, res) => {
       if (post.ownerId.toString() === req.userId) {
         await posts.findByIdAndDelete(req.params.id)
 
-        res.status(200).send('The post was successfully removed')
+        res.status(RESPONSE_CODES.noContent).send({})
       } else {
-        res.status(401).send('The post can be deleted only by owner.')
+        res.status(RESPONSE_CODES.unauthorized)
+          .send('The post can be deleted only by owner.')
       }
     } else {
-      res.status(404).send('No post found.')
+      res.status(RESPONSE_CODES.notFound).send('No post found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the post.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the post.')
   }
 })
 
@@ -412,15 +428,17 @@ router.put('/comments/:id', verifyToken, async (req, res) => {
           updatedAt: new Date(),
         })
 
-        res.status(204).send({})
+        res.status(RESPONSE_CODES.noContent).send({})
       } else {
-        res.status(401).send('The comment can be updated only by owner.')
+        res.status(RESPONSE_CODES.unauthorized)
+          .send('The comment can be updated only by owner.')
       }
     } else {
-      res.status(404).send('No comment found.')
+      res.status(RESPONSE_CODES.notFound).send('No comment found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the comment.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the comment.')
   }
 })
 
@@ -432,15 +450,17 @@ router.delete('/comments/:id', verifyToken, async (req, res) => {
       if (comment.ownerId.toString() === req.userId) {
         await comments.findByIdAndDelete(req.params.id)
 
-        res.status(204).send({})
+        res.status(RESPONSE_CODES.noContent).send({})
       } else {
-        res.status(401).send('The comment can be deleted only by owner.')
+        res.status(RESPONSE_CODES.unauthorized)
+          .send('The comment can be deleted only by owner.')
       }
     } else {
-      res.status(404).send('No comment found.')
+      res.status(RESPONSE_CODES.notFound).send('No comment found.')
     }
   } catch (e) {
-    res.status(500).send('There was a problem finding the comment.')
+    res.status(RESPONSE_CODES.internalServerError)
+      .send('There was a problem finding the comment.')
   }
 })
 
