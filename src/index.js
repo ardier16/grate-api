@@ -5,13 +5,13 @@ import mongoose from 'mongoose'
 
 import config from './config'
 
-import UsersController from './users/users-controller'
-import PostsController from './posts/posts-controller'
-import AuthController from './auth/auth-controller'
-import DocumentsController from './documents/documents-controller'
-import FilesController from './files/files-controller'
-import FriendsController from './friends/friends-controller'
-import FactorsController from './factors/factors-controller'
+import UsersController from './modules/users/users-controller'
+import PostsController from './modules/posts/posts-controller'
+import AuthController from './modules/auth/auth-controller'
+import DocumentsController from './modules/documents/documents-controller'
+import FilesController from './modules/files/files-controller'
+import FriendsController from './modules/friends/friends-controller'
+import FactorsController from './modules/factors/factors-controller'
 
 const app = express()
 
